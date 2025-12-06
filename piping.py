@@ -1,4 +1,4 @@
-from typing import Any, Callable, overload, Concatenate, Final
+from typing import Any, Callable, overload, Final
 from functools import wraps
 
 class Pipable[T]:
@@ -132,26 +132,26 @@ class Pipable[T]:
 
     # func() has >= 3 arguments & func() has **kwargs
     @overload
-    def __rshift__[**P, R](
-        self, func_and_args: tuple[Callable[Concatenate[T, P], R], tuple[Any, ...], dict[str, Any]]
+    def __rshift__[R](
+        self, func_and_args: tuple[Callable[..., R], tuple[Any, ...], dict[str, Any]]
     ) -> Pipable[R]: ...
 
     # func() has 2 arguments & func() has **kwargs
     @overload
-    def __rshift__[S, R](
-        self, func_and_args: tuple[Callable[[T, S], R], S, dict[str, Any]]
+    def __rshift__[R](
+        self, func_and_args: tuple[Callable[..., R], Any, dict[str, Any]]
     ) -> Pipable[R]: ...
 
     # func() has 1 argument & func() has **kwargs
     @overload
     def __rshift__[R](
-        self, func_and_args: tuple[Callable[[T], R], dict[str, Any]]
+        self, func_and_args: tuple[Callable[..., R], dict[str, Any]]
     ) -> Pipable[R]: ...
 
     # func() has >= 3 arguments
     @overload
-    def __rshift__[**P, R](
-        self, func_and_args: tuple[Callable[Concatenate[T, P], R], tuple[Any, ...]]
+    def __rshift__[R](
+        self, func_and_args: tuple[Callable[..., R], tuple[Any, ...]]
     ) -> Pipable[R]: ...
 
     # func() has 2 arguments
