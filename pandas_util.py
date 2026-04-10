@@ -32,8 +32,7 @@ def clean_aggregation(
     
     return (df
         .groupby(group_by_cols_)
-        .agg({agg_col_: agg_func})
-        .rename(columns = {agg_col_: agg_result_colname_})
+        .agg(**{agg_result_colname_: (agg_col_, agg_func)})
         .reset_index())
 
 # ---------------------------------------------------------------
@@ -58,13 +57,11 @@ def clean_multiple_aggregation(
     *agg_specs: AggSpec
 ) -> pd.DataFrame:
     
-    agg_dict: dict[str, str] = \
-        {agg_spec.get_agg_result_colname(): agg_spec.agg_func for agg_spec in agg_specs}
-    rename_dict: dict[str, Any] = \
-        {agg_spec.get_agg_result_colname(): df[agg_spec.agg_col] for agg_spec in agg_specs}
+    agg_dict: dict[str, tuple[str, str]] = \
+        {agg_spec.get_agg_result_colname(): (agg_spec.agg_col, agg_spec.agg_func)
+         for agg_spec in agg_specs}
     
     return (df
-        .assign(**rename_dict)
         .groupby(group_by_cols)
-        .agg(agg_dict)
+        .agg(**agg_dict)
         .reset_index())
