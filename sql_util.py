@@ -69,8 +69,9 @@ class SqlQuery:
     def __getattr__(self, name: str) -> Callable[[Any], SqlQuery]:
         name = name.replace("_", " ").upper()
         def add_to_query_(add2: Any = None) -> SqlQuery:
-            self.add_to_query(name, add2)
-            return self
+            new_query = SqlQuery(self.query, self.table_name, self.columns)
+            new_query.add_to_query(name, add2)
+            return new_query
         return add_to_query_
         
     @staticmethod
