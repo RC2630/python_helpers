@@ -91,9 +91,9 @@ class SqlQuery:
             if isinstance(add2, SqlQuery):
                 add2 = f"({add2.query})"
             self.query += " " + str(add2)
-        if add1 == "FROM":
+        if add1 == "FROM" and self.table_name is None:
             self.table_name = str(add2).strip().split()[0]
-        if add1 == "SELECT" and str(add2).lower().strip() not in ["*", "distinct *"]:
+        if add1 == "SELECT" and self.columns is None and str(add2).lower().strip() not in ["*", "distinct *"]:
             self.columns = [SqlQuery.get_canonical(column) for column in str(add2).split(",")]
 
     def get_query_string(self) -> str:
