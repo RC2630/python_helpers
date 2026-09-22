@@ -1,6 +1,6 @@
 from random import randint
 from typing import Literal, Callable
-from collections.abc import MutableSequence, Sequence, Collection, Iterator
+from collections.abc import MutableSequence, Sequence, Collection
 from helpers.misc_util import is_hashable_seq
 
 class EmptySequenceError(Exception): pass
@@ -102,22 +102,17 @@ class Exclusion[T]:
         self.elements_to_exclude: Collection[T] = elements_to_exclude
         self.use_rejection: bool = use_rejection
         self.seq_with_exclusion: Sequence[T] = ()
-        self.new_to_old_index_map: dict[int, int] = {}
+        self.new_to_old_index_map: tuple[int, ...] = ()
 
     def initialize(self, seq: Sequence[T]) -> None:
         self.seq_with_exclusion = ()
-        self.new_to_old_index_map = {}
+        self.new_to_old_index_map = ()
         if not self.use_rejection and len(self.elements_to_exclude) > 0:
-            kept_indices_and_elements: Iterator[tuple[int, ...] | tuple[T, ...]] = zip(
-                *((i, e) for i, e in enumerate(seq) if e not in self.elements_to_exclude)
-            )
             try:
-                self.new_to_old_index_map = {
-                    new_index: old_index for new_index, old_index
-                    in enumerate(next(kept_indices_and_elements))
-                }
-                self.seq_with_exclusion = next(kept_indices_and_elements)
-            except StopIteration:
+                self.new_to_old_index_map, self.seq_with_exclusion = zip(
+                    *((i, e) for i, e in enumerate(seq) if e not in self.elements_to_exclude)
+                )
+            except ValueError:
                 pass
         else:
             self.seq_with_exclusion = seq
