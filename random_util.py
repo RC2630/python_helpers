@@ -105,6 +105,8 @@ class Exclusion[T]:
         self.new_to_old_index_map: dict[int, int] = {}
 
     def initialize(self, seq: Sequence[T]) -> None:
+        self.seq_with_exclusion = ()
+        self.new_to_old_index_map = {}
         if not self.use_rejection and len(self.elements_to_exclude) > 0:
             kept_indices_and_elements: Iterator[tuple[int, ...] | tuple[T, ...]] = zip(
                 *((i, e) for i, e in enumerate(seq) if e not in self.elements_to_exclude)
