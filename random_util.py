@@ -1,7 +1,7 @@
 from random import randint
 from typing import Literal, Callable
 from collections.abc import MutableSequence, Sequence, Collection
-from misc_util import is_hashable_seq
+from helpers.misc_util import is_hashable_seq
 
 class EmptySequenceError(Exception): pass
 class NotEnoughElementsError(Exception): pass
