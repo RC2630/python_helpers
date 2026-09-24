@@ -1,5 +1,6 @@
 from random import randint
 from typing import Literal, Callable
+from collections import defaultdict
 from collections.abc import MutableSequence, Sequence, Collection
 from helpers.misc_util import is_hashable_seq
 
@@ -147,14 +148,17 @@ class IndexManager[T]:
         use_rejection_on_already_added: bool,
         use_coarse_hashability_check: bool
     ) -> None:
+        
         self.seq: Sequence[T] = seq
         self.mode: Literal["with_replacement", "distinct_indices", "unique_elements"] = mode
         self.use_rejection_on_already_added: bool = use_rejection_on_already_added
         self.random_indices: set[int] = set()
+
         self.eligible_indices: list[int] | None = (
             None if use_rejection_on_already_added or mode == "with_replacement"
             else list(range(len(seq)))
         )
+
         self.random_elements: set[T] | list[T] | None = (
             None if not use_rejection_on_already_added or mode != "unique_elements"
             else (
@@ -162,8 +166,24 @@ class IndexManager[T]:
                 else []
             )
         )
+
         self.random_pos: int | None = None
         self.random_index: int = -1
+
+        self.eligible_index_to_pos: list[int] | None = None
+        self.element_to_indices: dict[T, list[int]] | None = None
+        if (
+            mode == "unique_elements"
+            and not use_rejection_on_already_added
+            and is_hashable_seq(seq, use_coarse_hashability_check)
+        ):
+            self.build_mappings()
+
+    def build_mappings(self) -> None:
+        self.eligible_index_to_pos = list(range(len(self.seq)))
+        self.element_to_indices = defaultdict(list)
+        for i, element in enumerate(self.seq):
+            self.element_to_indices[element].append(i)
 
     def sample_element(self) -> T:
         if self.eligible_indices is None:
@@ -206,33 +226,33 @@ class IndexManager[T]:
                 else:
                     self.random_elements.append(self.seq[self.random_index])
             else:
-                assert self.eligible_indices is not None
-                self.eligible_indices = [
-                    index for index in self.eligible_indices
-                    if self.seq[index] != self.seq[self.random_index]
-                ]
-
-    @staticmethod
-    def remove_from_seq[S](
-        seq: MutableSequence[S],
-        indices_to_delete: set[int],
-        keep_seq_order: bool
-    ) -> None:
-        if keep_seq_order:
-            temp_seq: list[S] = []
-            for i, element in enumerate(seq):
-                if i not in indices_to_delete:
-                    temp_seq.append(element)
-            seq.clear()
-            seq.extend(temp_seq)
-        else:
-            while len(indices_to_delete) > 0:
-                last_index: int = len(seq) - 1
-                if last_index in indices_to_delete:
-                    indices_to_delete.remove(last_index)
+                if self.element_to_indices is not None:
+                    self.update_eligible_indices_and_mappings()
                 else:
-                    seq[indices_to_delete.pop()] = seq[-1]
-                seq.pop()
+                    assert self.eligible_indices is not None
+                    self.eligible_indices = [
+                        index for index in self.eligible_indices
+                        if self.seq[index] != self.seq[self.random_index]
+                    ]
+
+    def update_eligible_indices_and_mappings(self) -> None:
+        assert self.element_to_indices is not None
+        assert self.eligible_index_to_pos is not None
+        assert self.eligible_indices is not None
+        no_longer_eligible_indices: list[int] = \
+            self.element_to_indices.pop(self.seq[self.random_index])
+        no_longer_eligible_positions: set[int] = \
+            {self.eligible_index_to_pos[i] for i in no_longer_eligible_indices}
+        while len(no_longer_eligible_positions) > 0:
+            last_pos: int = len(self.eligible_indices) - 1
+            if last_pos in no_longer_eligible_positions:
+                no_longer_eligible_positions.remove(last_pos)
+            else:
+                chosen_pos: int = no_longer_eligible_positions.pop()
+                last_index: int = self.eligible_indices[-1]
+                self.eligible_indices[chosen_pos] = last_index
+                self.eligible_index_to_pos[last_index] = chosen_pos
+            self.eligible_indices.pop()
 
 # -----------------------------------------------------------
 
@@ -289,6 +309,29 @@ def validate_args[T](
 
 # -----------------------------------------------------------
 
+def remove_from_seq[T](
+    seq: MutableSequence[T],
+    indices_to_delete: set[int],
+    keep_seq_order: bool
+) -> None:
+    if keep_seq_order:
+        temp_seq: list[T] = []
+        for i, element in enumerate(seq):
+            if i not in indices_to_delete:
+                temp_seq.append(element)
+        seq.clear()
+        seq.extend(temp_seq)
+    else:
+        while len(indices_to_delete) > 0:
+            last_index: int = len(seq) - 1
+            if last_index in indices_to_delete:
+                indices_to_delete.remove(last_index)
+            else:
+                seq[indices_to_delete.pop()] = seq[-1]
+            seq.pop()
+
+# -----------------------------------------------------------
+
 def sample_from_sequence[T](
     seq: Sequence[T],
     count: int = 1,
@@ -329,7 +372,7 @@ def sample_from_sequence[T](
     if remove:
         assert isinstance(seq, MutableSequence)
         indices_to_delete: set[int] = exclude.get_old_indices(index_manager.random_indices)
-        IndexManager.remove_from_seq(seq, indices_to_delete, keep_seq_order)
+        remove_from_seq(seq, indices_to_delete, keep_seq_order)
 
     return final_result
 
