@@ -329,7 +329,7 @@ def sample_from_sequence[T](
     if remove:
         assert isinstance(seq, MutableSequence)
         indices_to_delete: set[int] = exclude.get_old_indices(index_manager.random_indices)
-        index_manager.remove_from_seq(seq, indices_to_delete, keep_seq_order)
+        IndexManager.remove_from_seq(seq, indices_to_delete, keep_seq_order)
 
     return final_result
 
