@@ -226,8 +226,12 @@ class IndexManager[T]:
             seq.clear()
             seq.extend(temp_seq)
         else:
-            for i in sorted(indices_to_delete, reverse = True):
-                seq[i] = seq[-1]
+            while len(indices_to_delete) > 0:
+                last_index: int = len(seq) - 1
+                if last_index in indices_to_delete:
+                    indices_to_delete.remove(last_index)
+                else:
+                    seq[indices_to_delete.pop()] = seq[-1]
                 seq.pop()
 
 # -----------------------------------------------------------
@@ -326,7 +330,7 @@ def sample_from_sequence[T](
         assert isinstance(seq, MutableSequence)
         indices_to_delete: set[int] = exclude.get_old_indices(index_manager.random_indices)
         index_manager.remove_from_seq(seq, indices_to_delete, keep_seq_order)
-            
+
     return final_result
 
 # -----------------------------------------------------------
