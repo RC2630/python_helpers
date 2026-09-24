@@ -212,6 +212,24 @@ class IndexManager[T]:
                     if self.seq[index] != self.seq[self.random_index]
                 ]
 
+    @staticmethod
+    def remove_from_seq[S](
+        seq: MutableSequence[S],
+        indices_to_delete: set[int],
+        keep_seq_order: bool
+    ) -> None:
+        if keep_seq_order:
+            temp_seq: list[S] = []
+            for i, element in enumerate(seq):
+                if i not in indices_to_delete:
+                    temp_seq.append(element)
+            seq.clear()
+            seq.extend(temp_seq)
+        else:
+            for i in sorted(indices_to_delete, reverse = True):
+                seq[i] = seq[-1]
+                seq.pop()
+
 # -----------------------------------------------------------
 
 def validate_args[T](
@@ -271,6 +289,7 @@ def sample_from_sequence[T](
     seq: Sequence[T],
     count: int = 1,
     remove: bool = False,
+    keep_seq_order: bool = True,
     exclude: Exclusion[T] | None = None,
     mode: Literal["with_replacement", "distinct_indices", "unique_elements"] = "with_replacement",
     use_rejection_on_already_added: bool = False,
@@ -306,11 +325,48 @@ def sample_from_sequence[T](
     if remove:
         assert isinstance(seq, MutableSequence)
         indices_to_delete: set[int] = exclude.get_old_indices(index_manager.random_indices)
-        temp_seq: list[T] = []
-        for i, element in enumerate(seq):
-            if i not in indices_to_delete:
-                temp_seq.append(element)
-        seq.clear()
-        seq.extend(temp_seq)
+        index_manager.remove_from_seq(seq, indices_to_delete, keep_seq_order)
             
     return final_result
+
+# -----------------------------------------------------------
+
+def random_element[T](seq: Sequence[T], remove: bool = False) -> T:
+    return sample_from_sequence(
+        seq = seq,
+        count = 1,
+        remove = remove,
+        keep_seq_order = False,
+        exclude = Exclusion(
+            elements_to_exclude = (),
+            use_rejection = True
+        ),
+        mode = "with_replacement",
+        use_rejection_on_already_added = True,
+        use_coarse_hashability_check = True,
+        validation_options = ValidationOptions(),
+        cheap_coarse_exclusion_validation = True
+    )[0]
+
+def fast_rejection_sample[T](
+    seq: Sequence[T],
+    count: int,
+    remove: bool = False,
+    exclude: Collection[T] = (),
+    mode: Literal["with_replacement", "distinct_indices", "unique_elements"] = "with_replacement"
+) -> list[T]:
+    return sample_from_sequence(
+        seq = seq,
+        count = count,
+        remove = remove,
+        keep_seq_order = False,
+        exclude = Exclusion(
+            elements_to_exclude = exclude,
+            use_rejection = True
+        ),
+        mode = mode,
+        use_rejection_on_already_added = True,
+        use_coarse_hashability_check = True,
+        validation_options = ValidationOptions(),
+        cheap_coarse_exclusion_validation = True
+    )
