@@ -1,5 +1,5 @@
 from typing import Any
-from collections.abc import Sequence
+from collections.abc import Sequence, Iterator
 
 def is_hashable(obj: Any) -> bool:
     try:
@@ -37,3 +37,9 @@ def multiplicative_number(n: int) -> str:
         return "thrice"
     else:
         return f"{n} times"
+
+def increment(start: int = 0) -> Iterator[int]:
+    curr: int = start
+    while True:
+        yield curr
+        curr += 1
