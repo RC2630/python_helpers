@@ -1,5 +1,6 @@
 from typing import Any
 from collections.abc import Sequence, Iterator
+from itertools import groupby
 
 def is_hashable(obj: Any) -> bool:
     try:
@@ -43,3 +44,6 @@ def increment(start: int = 0) -> Iterator[int]:
     while True:
         yield curr
         curr += 1
+
+def get_runs[T](l: list[T]) -> list[tuple[T, int]]:
+    return [(value, len(list(group))) for value, group in groupby(l)]
