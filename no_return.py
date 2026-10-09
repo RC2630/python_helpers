@@ -9,7 +9,7 @@ class FunctionCallRecord[R](NamedTuple):
     kwargs: dict[str, Any]
     result: R
 
-def change_to_no_return_helper[**P, R](
+def change_to_output_param[**P, R](
     func: Callable[P, R]
 ) -> Callable[Concatenate[ResultRef[R], P], None]:
     @wraps(func)
@@ -21,7 +21,7 @@ def change_to_no_return[**P, R](
     result_ref: ResultRef[R]
 ) -> Callable[[Callable[P, R]], Callable[P, None]]:
     def actual_change_to_no_return(func: Callable[P, R]) -> Callable[P, None]:
-        changed_func = change_to_no_return_helper(func)
+        changed_func = change_to_output_param(func)
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
             changed_func(result_ref, *args, **kwargs)
