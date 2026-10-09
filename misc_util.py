@@ -14,3 +14,26 @@ def is_hashable_seq[T](seq: Sequence[T], coarse: bool = False) -> bool:
         if coarse and len(seq) > 0
         else tuple(seq)
     )
+
+def ordinal_number(n: int) -> str:
+    s: str = str(n)
+    if s.endswith(("11", "12", "13")):
+        return s + "th"
+    elif s.endswith("1"):
+        return s + "st"
+    elif s.endswith("2"):
+        return s + "nd"
+    elif s.endswith("3"):
+        return s + "rd"
+    else:
+        return s + "th"
+    
+def multiplicative_number(n: int) -> str:
+    if n == 1:
+        return "once"
+    elif n == 2:
+        return "twice"
+    elif n == 3:
+        return "thrice"
+    else:
+        return f"{n} times"
