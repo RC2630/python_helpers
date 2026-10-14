@@ -1,5 +1,3 @@
-from collections.abc import Iterator
-
 class NullReferenceError(Exception): pass
 NULL = sentinel("NULL")
 
