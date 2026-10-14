@@ -39,11 +39,5 @@ def multiplicative_number(n: int) -> str:
     else:
         return f"{n} times"
 
-def increment(start: int = 0) -> Iterator[int]:
-    curr: int = start
-    while True:
-        yield curr
-        curr += 1
-
 def get_runs[T](l: list[T]) -> list[tuple[T, int]]:
     return [(value, len(list(group))) for value, group in groupby(l)]
