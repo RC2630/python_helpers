@@ -12,8 +12,11 @@ SECRET: str = r"C:\Royal Cannon 2630\ONE GIANT FOLDER\Miscellaneous\Personal ID\
 # -----------------------------------------------------
 
 def get_sql_password() -> str:
-    with open(SECRET, "r") as f:
-        return "".join(chr(int(line)) for line in f.read().splitlines())
+    try:
+        with open(SECRET, "r") as f:
+            return "".join(chr(int(line)) for line in f.read().splitlines())
+    except FileNotFoundError:
+        return "MISSING"
 
 # -----------------------------------------------------
 
