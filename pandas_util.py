@@ -1,6 +1,6 @@
 import pandas as pd
-from typing import Any
-from typing import NamedTuple
+from typing import Any, NamedTuple, cast
+from collections.abc import Sequence
 
 def resolve_merged_cells(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
@@ -65,3 +65,29 @@ def clean_multiple_aggregation(
         .groupby(group_by_cols)
         .agg(**agg_dict)
         .reset_index())
+
+# ---------------------------------------------------------------
+
+def build_df_from_named_tuples(named_tuples: Sequence[NamedTuple]) -> pd.DataFrame:
+    if len(named_tuples) == 0:
+        return pd.DataFrame()
+    return pd.DataFrame(named_tuples, columns = named_tuples[0]._fields)
+
+def extract_named_tuples_from_df[T](
+    df: pd.DataFrame, named_tuple_class: type[T]
+) -> list[T]:
+    return [
+        named_tuple_class(*row) for row in
+        df[list(cast(type[NamedTuple], named_tuple_class)._fields)]
+        .itertuples(index = False, name = None)
+    ]
+
+def extract_named_tuple_from_df_row_pos[T](
+    df: pd.DataFrame, row_pos: int, named_tuple_class: type[T]
+) -> T:
+    return extract_named_tuples_from_df(df.iloc[[row_pos]], named_tuple_class)[0]
+
+def extract_named_tuple_from_df_row_index[T](
+    df: pd.DataFrame, row_index: Any, named_tuple_class: type[T]
+) -> T:
+    return extract_named_tuples_from_df(df.loc[[row_index]], named_tuple_class)[0]
