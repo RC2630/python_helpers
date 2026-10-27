@@ -1,5 +1,5 @@
-from typing import Any
-from collections.abc import Sequence, Iterator
+from typing import Any, Callable
+from collections.abc import Sequence
 from itertools import groupby
 
 def is_hashable(obj: Any) -> bool:
@@ -41,3 +41,13 @@ def multiplicative_number(n: int) -> str:
 
 def get_runs[T](l: list[T]) -> list[tuple[T, int]]:
     return [(value, len(list(group))) for value, group in groupby(l)]
+
+def mark_requirements[**P, R](*requirements: str) -> Callable[[Callable[P, R]], Callable[P, R]]:
+    def decorator(f: Callable[P, R]) -> Callable[P, R]:
+        requirements_docstring: str = f"REQUIRES: {', '.join(requirements)}"
+        if f.__doc__ is None:
+            f.__doc__ = requirements_docstring
+        else:
+            f.__doc__ += f"\n{requirements_docstring}"
+        return f
+    return decorator
