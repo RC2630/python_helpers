@@ -29,7 +29,7 @@ class Node[V, E]:
         if len(self.edges) == 0:
             return f"{self.name} -> (no edges)"
         return self.name + " -> " + ", ".join(
-            f"{dest.name}: {cost}" for dest, cost in self.edges.items()
+            f"{dest.name}: {cost}" for dest, (cost, payload) in self.edges.items()
         )
 
     def all_connected_nodes(self) -> set[Node[V, E]]:

@@ -47,8 +47,8 @@ def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistP
         if curr_node in visited:
             continue
         visited.add(curr_node)
-        for neighbour, dist in curr_node.edges.items():
-            new_dist: float = curr_dist + dist.cost
+        for neighbour, (dist, payload) in curr_node.edges.items():
+            new_dist: float = curr_dist + dist
             if new_dist < distances.get(neighbour, infinite).distance:
                 distances[neighbour] = DistPrev(new_dist, curr_node)
                 heappush(frontier, (new_dist, neighbour.name, neighbour))
