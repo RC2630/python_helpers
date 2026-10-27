@@ -2,6 +2,7 @@ from helpers.graph_util.graph import *
 from helpers.misc_util import mark_requirements
 from heapq import *
 from typing import NamedTuple
+import itertools as it
 
 # ------------------------------------------------------------------
 
@@ -40,7 +41,8 @@ class DistPrev[V, E](NamedTuple):
 def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistPrev[V, E]]:
     distances: dict[Node[V, E], DistPrev[V, E]] = {start: DistPrev(0, None)}
     visited: set[Node[V, E]] = set()
-    frontier: list[tuple[float, str, Node[V, E]]] = [(0, start.name, start)]
+    incrementer: it.count[int] = it.count()
+    frontier: list[tuple[float, int, Node[V, E]]] = [(0, next(incrementer), start)]
     infinite: DistPrev[V, E] = DistPrev.infinite()
     while len(frontier) > 0:
         curr_dist, _, curr_node = heappop(frontier)
@@ -51,7 +53,7 @@ def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistP
             new_dist: float = curr_dist + dist
             if new_dist < distances.get(neighbour, infinite).distance:
                 distances[neighbour] = DistPrev(new_dist, curr_node)
-                heappush(frontier, (new_dist, neighbour.name, neighbour))
+                heappush(frontier, (new_dist, next(incrementer), neighbour))
     return distances
 
 def reconstruct_path[V, E](
