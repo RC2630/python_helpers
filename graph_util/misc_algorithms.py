@@ -38,6 +38,7 @@ class DistPrev[V, E](NamedTuple):
 
 # ------------------------------------------------------------------
 
+@mark_requirements("non-negative edge distances")
 def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistPrev[V, E]]:
     distances: dict[Node[V, E], DistPrev[V, E]] = {start: DistPrev(0, None)}
     visited: set[Node[V, E]] = set()
@@ -56,6 +57,7 @@ def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistP
                 heappush(frontier, (new_dist, next(incrementer), neighbour))
     return distances
 
+@mark_requirements("target is a key in dist_prevs")
 def reconstruct_path[V, E](
     target: Node[V, E], dist_prevs: dict[Node[V, E], DistPrev[V, E]]
 ) -> list[Node[V, E]]:
