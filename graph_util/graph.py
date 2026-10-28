@@ -1,9 +1,19 @@
 from typing import Callable, NamedTuple
+from collections.abc import Iterable
 import helpers.random_util as ru
 
+# -------------------------------------------
+
 class EdgeValue[E](NamedTuple):
+
     cost: float
     payload: E
+
+    def update_cost(self, new_cost: float) -> EdgeValue[E]:
+        return EdgeValue(new_cost, self.payload)
+
+    def update_payload(self, new_payload: E) -> EdgeValue[E]:
+        return EdgeValue(self.cost, new_payload)
 
 # -------------------------------------------
 
@@ -47,8 +57,11 @@ class Node[V, E]:
 
 class Graph[V, E]:
 
-    def __init__(self, nodes: list[Node[V, E]]) -> None:
-        self.nodes: list[Node[V, E]] = nodes.copy()
+    def __init__(self, nodes_or_node: Iterable[Node[V, E]] | Node[V, E] = ()) -> None:
+        if isinstance(nodes_or_node, Node):
+            self.nodes: list[Node[V, E]] = list(nodes_or_node.all_connected_nodes())
+        else:
+            self.nodes = list(nodes_or_node)
 
     def __repr__(self) -> str:
         if len(self.nodes) == 0:
