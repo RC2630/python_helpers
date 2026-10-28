@@ -6,10 +6,8 @@ import heapq
 
 # ----------------------------------------------------------
 
-def generalized_dfs[V, E](graph: Graph[V, E], node_func: Callable[[Node[V, E]], Any]) -> None:
-    if len(graph.nodes) == 0:
-        return
-    frontier: list[Node[V, E]] = [graph.nodes[0]]
+def generalized_dfs[V, E](start_node: Node[V, E], node_func: Callable[[Node[V, E]], Any]) -> None:
+    frontier: list[Node[V, E]] = [start_node]
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr: Node[V, E] = frontier.pop()
@@ -21,11 +19,9 @@ def generalized_dfs[V, E](graph: Graph[V, E], node_func: Callable[[Node[V, E]], 
             frontier.append(neighbour)
 
 def generalized_dfs_with_path[V, E](
-    graph: Graph[V, E], path_func: Callable[[list[Node[V, E]]], Any]
+    start_node: Node[V, E], path_func: Callable[[list[Node[V, E]]], Any]
 ) -> None:
-    if len(graph.nodes) == 0:
-        return
-    frontier: list[list[Node[V, E]]] = [[graph.nodes[0]]]
+    frontier: list[list[Node[V, E]]] = [[start_node]]
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr_path: list[Node[V, E]] = frontier.pop()
@@ -38,14 +34,12 @@ def generalized_dfs_with_path[V, E](
             frontier.append(curr_path + [neighbour])
 
 def generalized_dfs_with_custom_element[T, V, E](
-    graph: Graph[V, E],
+    start_node: Node[V, E],
     start_node_element: Callable[[Node[V, E]], T],
     on_visit_func: Callable[[T, Node[V, E]], Any],
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
 ) -> None:
-    if len(graph.nodes) == 0:
-        return
-    frontier: list[tuple[T, Node[V, E]]] = [(start_node_element(graph.nodes[0]), graph.nodes[0])]
+    frontier: list[tuple[T, Node[V, E]]] = [(start_node_element(start_node), start_node)]
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr_element, curr_node = frontier.pop()
@@ -89,16 +83,14 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
 # ----------------------------------------------------------
 
 def generalized_traversal[T, V, E](
-    graph: Graph[V, E],
+    start_node: Node[V, E],
     frontier_spec: FrontierSpecType[T],
     start_node_element: Callable[[Node[V, E]], T],
     on_visit_func: Callable[[T, Node[V, E]], Any],
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
 ) -> None:
-    if len(graph.nodes) == 0:
-        return
     frontier: Collection[tuple[T, Node[V, E]]] = frontier_spec.init()
-    frontier_spec.insert(frontier, (start_node_element(graph.nodes[0]), graph.nodes[0]))
+    frontier_spec.insert(frontier, (start_node_element(start_node), start_node))
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr_element, curr_node = frontier_spec.remove(frontier)
