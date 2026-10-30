@@ -84,10 +84,10 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
 
 def generalized_traversal[T, V, E](
     start_node: Node[V, E],
-    frontier_spec: FrontierSpecType[T],
     start_node_element: T,
     on_visit_func: Callable[[T, Node[V, E]], Any],
-    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
+    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T],
+    frontier_spec: FrontierSpecType[T]
 ) -> None:
     frontier: Collection[tuple[T, Node[V, E]]] = frontier_spec.init()
     frontier_spec.insert(frontier, (start_node_element, start_node))
