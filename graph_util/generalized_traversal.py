@@ -35,11 +35,11 @@ def generalized_dfs_with_path[V, E](
 
 def generalized_dfs_with_custom_element[T, V, E](
     start_node: Node[V, E],
-    start_node_element: Callable[[Node[V, E]], T],
+    start_node_element: T,
     on_visit_func: Callable[[T, Node[V, E]], Any],
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
 ) -> None:
-    frontier: list[tuple[T, Node[V, E]]] = [(start_node_element(start_node), start_node)]
+    frontier: list[tuple[T, Node[V, E]]] = [(start_node_element, start_node)]
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr_element, curr_node = frontier.pop()
@@ -85,12 +85,12 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
 def generalized_traversal[T, V, E](
     start_node: Node[V, E],
     frontier_spec: FrontierSpecType[T],
-    start_node_element: Callable[[Node[V, E]], T],
+    start_node_element: T,
     on_visit_func: Callable[[T, Node[V, E]], Any],
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
 ) -> None:
     frontier: Collection[tuple[T, Node[V, E]]] = frontier_spec.init()
-    frontier_spec.insert(frontier, (start_node_element(start_node), start_node))
+    frontier_spec.insert(frontier, (start_node_element, start_node))
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
         curr_element, curr_node = frontier_spec.remove(frontier)
