@@ -1,5 +1,5 @@
 from typing import Any, Callable
-from collections.abc import Sequence
+from collections.abc import Sequence, Iterable
 from itertools import groupby
 
 def is_hashable(obj: Any) -> bool:
@@ -51,3 +51,18 @@ def mark_requirements[**P, R](*requirements: str) -> Callable[[Callable[P, R]], 
             f.__doc__ += f"\n{requirements_docstring}"
         return f
     return decorator
+
+def find_witness_if_any[T, W, S](
+    iterable: Iterable[T],
+    predicate: Callable[[T], bool],
+    witness: Callable[[T], W] = lambda element: element,
+    sentinel: S = None
+) -> W | S:
+    w: W | S = sentinel
+    if any(
+        predicate(element) and (w := witness(element)) is w
+        for element in iterable
+    ):
+        return w
+    else:
+        return sentinel
