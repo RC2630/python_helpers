@@ -72,7 +72,7 @@ class Graph[V, E]:
         remaining_nodes: set[Node[V, E]] = set(self.nodes)
         connected_components: list[set[Node[V, E]]] = []
         while len(remaining_nodes) > 0:
-            arbitrary_node: Node[V, E] = next(iter(remaining_nodes))
+            arbitrary_node: Node[V, E] = remaining_nodes.pop()
             connected_component: set[Node[V, E]] = arbitrary_node.all_connected_nodes()
             connected_components.append(connected_component)
             remaining_nodes.difference_update(connected_component)
