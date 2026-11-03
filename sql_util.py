@@ -18,6 +18,8 @@ def get_sql_password() -> str:
     except FileNotFoundError:
         return "MISSING"
 
+DEFAULT_PASSWORD: str = get_sql_password()
+
 # -----------------------------------------------------
 
 def run_sql_query(query: str, **connection_config: str) -> Table:
@@ -25,7 +27,7 @@ def run_sql_query(query: str, **connection_config: str) -> Table:
     conn: Connection = pymysql.connect(
         host = connection_config.get("host", "localhost"),
         user = connection_config.get("user", "root"),
-        password = connection_config.get("password", get_sql_password()),
+        password = connection_config.get("password", DEFAULT_PASSWORD),
         database = connection_config.get("database", "misc"),
         cursorclass = Cursor
     )
