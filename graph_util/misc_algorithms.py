@@ -35,7 +35,7 @@ class DistPrev[V, E](NamedTuple):
     previous: Node[V, E] | None
 
     @staticmethod
-    def infinite() -> DistPrev[V, E]:
+    def infinite() -> DistPrev[Any, Any]:
         return DistPrev(float("inf"), None)
 
 # ------------------------------------------------------------------
@@ -46,7 +46,7 @@ def shortest_dists_from_start[V, E](start: Node[V, E]) -> dict[Node[V, E], DistP
     visited: set[Node[V, E]] = set()
     incrementer: it.count[int] = it.count()
     frontier: list[tuple[float, int, Node[V, E]]] = [(0, next(incrementer), start)]
-    infinite: DistPrev[V, E] = DistPrev.infinite()
+    infinite: DistPrev[Any, Any] = DistPrev.infinite()
     while len(frontier) > 0:
         curr_dist, _, curr_node = heappop(frontier)
         if curr_node in visited:
