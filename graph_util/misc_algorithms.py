@@ -106,20 +106,24 @@ class DisjointSets:
 
 # ------------------------------------------------------------------
 
+@mark_requirements("undirected")
 def get_sorted_edges[V, E](
     graph: Graph[V, E], optimum_type: Literal["minimum", "maximum"] = "minimum"
 ) -> list[tuple[Node[V, E], Node[V, E]]]:
     edges: dict[tuple[Node[V, E], Node[V, E]], float] = {}
+    seen: set[Node[V, E]] = set()
     for node in graph.nodes:
         for dest, (cost, payload) in node.edges.items():
-            edges[(node, dest)] = cost
+            if dest not in seen:
+                edges[(node, dest)] = cost
+        seen.add(node)
     return sorted(
         edges,
         key = lambda edge: edges[edge],
         reverse = (optimum_type == "maximum")
     )
 
-@mark_requirements("undirected", "connnected", "root is in the graph")
+@mark_requirements("undirected", "connected", "root is in the graph")
 def optimal_spanning_tree[V, E](
     graph: Graph[V, E],
     optimum_type: Literal["minimum", "maximum"] = "minimum",
