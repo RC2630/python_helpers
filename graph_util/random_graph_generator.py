@@ -9,7 +9,8 @@ def generate_graph_attempt(
     num_edges_distribution: Callable[[], int],
     cost_distribution: Callable[[], float],
     ensure_connected: bool,
-    undirected: bool
+    undirected: bool,
+    require_strong: bool
 ) -> Graph[None, None]:
     
     nodes: list[Node[None, None]] = [Node(f"n{i}") for i in range(num_nodes)]
@@ -52,7 +53,7 @@ def generate_graph_attempt(
         if undirected:
             g.make_connected_undirected(cost_distribution)
         else:
-            g.make_connected_directed(cost_distribution)
+            g.make_connected_directed(cost_distribution, require_strong = require_strong)
 
     return g
 
@@ -61,17 +62,18 @@ def generate_graph_attempt(
 def generate_graph(
     num_nodes: int,
     num_edges_distribution: Callable[[], int],
-    cost_distribution: Callable[[], float],
+    cost_distribution: Callable[[], float] = lambda: 1,
     ensure_connected: bool = True,
-    max_attempts: int = 1000,
-    undirected: bool = True
+    undirected: bool = True,
+    require_strong: bool = False,
+    max_attempts: int = 1000
 ) -> Graph[None, None]:
     attempts: int = 0
     while attempts < max_attempts:
         try:
             return generate_graph_attempt(
                 num_nodes, num_edges_distribution, cost_distribution,
-                ensure_connected, undirected
+                ensure_connected, undirected, require_strong
             )
         except (ru.EmptySequenceError, ru.NotEnoughElementsError):
             attempts += 1

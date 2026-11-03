@@ -378,23 +378,6 @@ def sample_from_sequence[T](
 
 # -----------------------------------------------------------
 
-def random_element[T](seq: Sequence[T], remove: bool = False) -> T:
-    return sample_from_sequence(
-        seq = seq,
-        count = 1,
-        remove = remove,
-        keep_seq_order = False,
-        exclude = Exclusion(
-            elements_to_exclude = (),
-            use_rejection = True
-        ),
-        mode = "with_replacement",
-        use_rejection_on_already_added = True,
-        use_coarse_hashability_check = True,
-        validation_options = ValidationOptions(),
-        cheap_coarse_exclusion_validation = True
-    )[0]
-
 def fast_rejection_sample[T](
     seq: Sequence[T],
     count: int,
@@ -417,3 +400,10 @@ def fast_rejection_sample[T](
         validation_options = ValidationOptions(),
         cheap_coarse_exclusion_validation = True
     )
+
+def random_element[T](
+    seq: Sequence[T],
+    remove: bool = False,
+    exclude: Collection[T] = ()
+) -> T:
+    return fast_rejection_sample(seq, 1, remove, exclude)[0]

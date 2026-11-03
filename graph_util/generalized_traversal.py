@@ -6,7 +6,10 @@ import heapq
 
 # ----------------------------------------------------------
 
-def generalized_dfs[V, E](start_node: Node[V, E], node_func: Callable[[Node[V, E]], Any]) -> None:
+def generalized_dfs[V, E](
+    start_node: Node[V, E],
+    node_func: Callable[[Node[V, E]], Any] = lambda node: None
+) -> None:
     frontier: list[Node[V, E]] = [start_node]
     visited: set[Node[V, E]] = set()
     while len(frontier) > 0:
@@ -19,7 +22,8 @@ def generalized_dfs[V, E](start_node: Node[V, E], node_func: Callable[[Node[V, E
             frontier.append(neighbour)
 
 def generalized_dfs_with_path[V, E](
-    start_node: Node[V, E], path_func: Callable[[list[Node[V, E]]], Any]
+    start_node: Node[V, E],
+    path_func: Callable[[list[Node[V, E]]], Any] = lambda path: None
 ) -> None:
     frontier: list[list[Node[V, E]]] = [[start_node]]
     visited: set[Node[V, E]] = set()
@@ -35,9 +39,11 @@ def generalized_dfs_with_path[V, E](
 
 def generalized_dfs_with_custom_element[T, V, E](
     start_node: Node[V, E],
-    start_node_element: T,
-    on_visit_func: Callable[[T, Node[V, E]], Any],
-    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T]
+    start_node_element: T = NONE,
+    on_visit_func: Callable[[T, Node[V, E]], Any] = lambda element, node: None,
+    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
+        lambda element, curr, neighbour: element
+    )
 ) -> None:
     frontier: list[tuple[T, Node[V, E]]] = [(start_node_element, start_node)]
     visited: set[Node[V, E]] = set()
@@ -84,10 +90,12 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
 
 def generalized_traversal[T, V, E](
     start_node: Node[V, E],
-    start_node_element: T,
-    on_visit_func: Callable[[T, Node[V, E]], Any],
-    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T],
-    frontier_spec: FrontierSpecType[T]
+    start_node_element: T = NONE,
+    on_visit_func: Callable[[T, Node[V, E]], Any] = lambda element, node: None,
+    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
+        lambda element, curr, neighbour: element
+    ),
+    frontier_spec: FrontierSpecType[T] = STACK_FRONTIER
 ) -> None:
     frontier: Collection[tuple[T, Node[V, E]]] = frontier_spec.init()
     frontier_spec.insert(frontier, (start_node_element, start_node))
