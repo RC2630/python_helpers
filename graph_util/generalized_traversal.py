@@ -2,6 +2,7 @@ from helpers.graph_util.graph import *
 from typing import Any, NamedTuple
 from collections import deque
 from collections.abc import Collection
+from helpers.random_util import random_element
 import heapq
 
 # ----------------------------------------------------------
@@ -84,6 +85,24 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
     init = list,
     insert = heapq.heappush,
     remove = heapq.heappop
+)
+
+MAX_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
+    init = list,
+    insert = heapq.heappush_max,
+    remove = heapq.heappop_max
+)
+
+SET_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
+    init = set,
+    insert = set.add,
+    remove = set.pop
+)
+
+RANDOM_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
+    init = list,
+    insert = list.append,
+    remove = lambda l: random_element(l, remove = True)
 )
 
 # ----------------------------------------------------------
