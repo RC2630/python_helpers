@@ -104,12 +104,12 @@ RANDOM_FRONTIER = FrontierSpec[Any, list[Any]](
 
 NO_VISITED_SET = sentinel("NO_VISITED_SET") # using python 3.15+ built-in sentinel
 
-def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
+def generalized_traversal_multiple_successors[T, V, E, DS, I, K: Hashable](
     start_node: Node[V, E],
     start_node_element: T = None,
     node_yield_func: Callable[[T, Node[V, E]], I] = lambda element, node: (node, element),
-    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
-        lambda element, curr, neighbour: element
+    neighbour_elements: Callable[[T, Node[V, E], Node[V, E]], Iterable[T]] = (
+        lambda element, curr, neighbour: [element]
     ),
     visited_key: Callable[[T, Node[V, E]], K] | NO_VISITED_SET = lambda element, node: node,
     neighbours_func: Callable[[T, Node[V, E]], Iterable[Node[V, E]]] = (
@@ -129,10 +129,27 @@ def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
             visited.add(curr_key)
         yield node_yield_func(curr_element, curr_node)
         for neighbour in neighbours_func(curr_element, curr_node):
-            frontier_spec.insert(
-                frontier,
-                (neighbour_element(curr_element, curr_node, neighbour), neighbour)
-            )
+            for next_element in neighbour_elements(curr_element, curr_node, neighbour):
+                frontier_spec.insert(frontier, (next_element, neighbour))
+
+def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
+    start_node: Node[V, E],
+    start_node_element: T = None,
+    node_yield_func: Callable[[T, Node[V, E]], I] = lambda element, node: (node, element),
+    neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
+        lambda element, curr, neighbour: element
+    ),
+    visited_key: Callable[[T, Node[V, E]], K] | NO_VISITED_SET = lambda element, node: node,
+    neighbours_func: Callable[[T, Node[V, E]], Iterable[Node[V, E]]] = (
+        lambda element, curr: curr.edges
+    ),
+    frontier_spec: FrontierSpec[T, DS] = STACK_FRONTIER
+) -> Iterator[I]:
+    yield from generalized_traversal_multiple_successors(
+        start_node, start_node_element, node_yield_func,
+        lambda element, curr, neighbour: [neighbour_element(element, curr, neighbour)],
+        visited_key, neighbours_func, frontier_spec
+    )
 
 # ----------------------------------------------------------
 
