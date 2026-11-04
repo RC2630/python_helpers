@@ -1,5 +1,4 @@
 from typing import Callable, NamedTuple
-from typing_extensions import Sentinel # for python 3.14 compatibility
 from collections import defaultdict
 from collections.abc import Iterable
 import helpers.random_util as ru
@@ -27,7 +26,7 @@ class EdgeValue[E](NamedTuple):
 
 class Node[V, E]:
 
-    SYMMETRIC = Sentinel("SYMMETRIC")
+    SYMMETRIC = sentinel("SYMMETRIC") # using python 3.15+ built-in sentinel
 
     def __init__(self, name: str | None = None, payload: V = None) -> None:
         self.name: str = name if name is not None else f"node_{id(self)}"

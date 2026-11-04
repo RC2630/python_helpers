@@ -1,7 +1,5 @@
-from typing_extensions import Sentinel # for python 3.14 compatibility
-
 class NullReferenceError(Exception): pass
-NULL = Sentinel("NULL")
+NULL = sentinel("NULL") # using python 3.15+ built-in sentinel
 
 class Reference[T]:
 
