@@ -63,6 +63,16 @@ class Pipable[T]:
     GET_AVAILABLE_CALLABLES: Final[str] = \
         "{key: value for key, value in (globals() | locals()).items() if callable(value)}"
 
+    type FuncAndArgsType = (
+        tuple[Function, tuple[Any, ...], dict[str, Any]] |
+        tuple[Function, Any, dict[str, Any]] |
+        tuple[Function, dict[str, Any]] |
+        tuple[Function, tuple[Any, ...]] |
+        tuple[Function, Any] |
+        Function |
+        VALUE
+    )
+
     @classmethod
     def set_available_callables(cls, available_callables: dict[str, Function]) -> None:
         cls.ALL_AVAILABLE_CALLABLES = cls.BUILT_IN_CALLABLES | available_callables
@@ -165,20 +175,9 @@ class Pipable[T]:
     @overload
     def __rshift__(self, func_and_args: VALUE) -> T: ...
 
-    def __rshift__(
-        self,
-        func_and_args: (
-            tuple[Function, tuple[Any, ...], dict[str, Any]] |
-            tuple[Function, Any, dict[str, Any]] |
-            tuple[Function, dict[str, Any]] |
-            tuple[Function, tuple[Any, ...]] |
-            tuple[Function, Any] |
-            Function |
-            VALUE
-        )
-    ) -> Pipable[Any] | T:
+    def __rshift__(self, func_and_args: FuncAndArgsType) -> Pipable[Any] | T:
 
-        f: Any = func_and_args
+        f: Pipable.FuncAndArgsType = func_and_args
         
         # piping just to get the final value
         if f is Pipable.VALUE:
