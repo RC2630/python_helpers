@@ -102,23 +102,28 @@ RANDOM_FRONTIER = FrontierSpec[Any, list[Any]](
 
 # ----------------------------------------------------------
 
-def generalized_traversal_iterator[T, V, E, DS, I](
+NO_VISITED_SET = sentinel("NO_VISITED_SET") # using python 3.15+ built-in sentinel
+
+def generalized_traversal_iterator[T, V, E, DS, I, K](
     start_node: Node[V, E],
     start_node_element: T = None,
     node_yield_func: Callable[[T, Node[V, E]], I] = lambda element, node: (node, element),
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
         lambda element, curr, neighbour: element
     ),
+    visited_key: Callable[[T, Node[V, E]], K] | NO_VISITED_SET = lambda element, node: node,
     frontier_spec: FrontierSpec[T, DS] = STACK_FRONTIER
 ) -> Iterator[I]:
     frontier: DS = frontier_spec.init()
     frontier_spec.insert(frontier, (start_node_element, start_node))
-    visited: set[Node[V, E]] = set()
+    visited: set[K] = set()
     while frontier_spec.has_items(frontier):
         curr_element, curr_node = frontier_spec.remove(frontier)
-        if curr_node in visited:
-            continue
-        visited.add(curr_node)
+        if visited_key is not NO_VISITED_SET:
+            curr_key: K = visited_key(curr_element, curr_node)
+            if curr_key in visited:
+                continue
+            visited.add(curr_key)
         yield node_yield_func(curr_element, curr_node)
         for neighbour in curr_node.edges:
             frontier_spec.insert(
@@ -145,7 +150,8 @@ def generalized_traversal[T, V, E, DS](
     frontier_spec: FrontierSpec[T, DS] = STACK_FRONTIER
 ) -> None:
     for _ in generalized_traversal_iterator(
-        start_node, start_node_element, on_visit_func, neighbour_element, frontier_spec
+        start_node, start_node_element, on_visit_func, neighbour_element,
+        frontier_spec = frontier_spec
     ):
         pass
 
