@@ -106,9 +106,10 @@ class DisjointSets:
 
 # ------------------------------------------------------------------
 
-@mark_requirements("undirected")
 def get_sorted_edges[V, E](
-    graph: Graph[V, E], optimum_type: Literal["minimum", "maximum"] = "minimum"
+    graph: Graph[V, E],
+    optimum_type: Literal["minimum", "maximum"] = "minimum",
+    undirected: bool = True
 ) -> list[tuple[Node[V, E], Node[V, E]]]:
     edges: dict[tuple[Node[V, E], Node[V, E]], float] = {}
     seen: set[Node[V, E]] = set()
@@ -116,7 +117,8 @@ def get_sorted_edges[V, E](
         for dest, (cost, payload) in node.edges.items():
             if dest not in seen:
                 edges[(node, dest)] = cost
-        seen.add(node)
+        if undirected:
+            seen.add(node)
     return sorted(
         edges,
         key = lambda edge: edges[edge],
