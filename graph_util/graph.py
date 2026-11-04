@@ -1,4 +1,5 @@
 from typing import Callable, NamedTuple
+from typing_extensions import Sentinel # for python 3.14 compatibility
 from collections import defaultdict
 from collections.abc import Iterable
 import helpers.random_util as ru
@@ -26,8 +27,7 @@ class EdgeValue[E](NamedTuple):
 
 class Node[V, E]:
 
-    class SymmetricSentinel: pass
-    SYMMETRIC = SymmetricSentinel()
+    SYMMETRIC = Sentinel("SYMMETRIC")
 
     def __init__(self, name: str | None = None, payload: V = None) -> None:
         self.name: str = name if name is not None else f"node_{id(self)}"
@@ -36,11 +36,11 @@ class Node[V, E]:
 
     def create_edge(
         self, dest: Node[V, E], cost: float = 1, undirected: bool = True,
-        payload: E = None, reversed_payload: E | SymmetricSentinel = SYMMETRIC
+        payload: E = None, reversed_payload: E | SYMMETRIC = SYMMETRIC
     ) -> None:
         self.edges[dest] = EdgeValue(cost, payload)
         if undirected:
-            if isinstance(reversed_payload, Node.SymmetricSentinel):
+            if reversed_payload is Node.SYMMETRIC:
                 dest.edges[self] = EdgeValue(cost, payload)
             else:
                 dest.edges[self] = EdgeValue(cost, reversed_payload)
