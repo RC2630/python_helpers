@@ -1,7 +1,7 @@
 from helpers.graph_util.graph import *
 from typing import Any, NamedTuple, Hashable
 from collections import deque
-from collections.abc import Iterator
+from collections.abc import Iterator, Iterable
 from helpers.random_util import random_element
 import heapq
 
@@ -112,6 +112,9 @@ def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
         lambda element, curr, neighbour: element
     ),
     visited_key: Callable[[T, Node[V, E]], K] | NO_VISITED_SET = lambda element, node: node,
+    neighbours_func: Callable[[T, Node[V, E]], Iterable[Node[V, E]]] = (
+        lambda element, curr: curr.edges
+    ),
     frontier_spec: FrontierSpec[T, DS] = STACK_FRONTIER
 ) -> Iterator[I]:
     frontier: DS = frontier_spec.init()
@@ -125,7 +128,7 @@ def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
                 continue
             visited.add(curr_key)
         yield node_yield_func(curr_element, curr_node)
-        for neighbour in curr_node.edges:
+        for neighbour in neighbours_func(curr_element, curr_node):
             frontier_spec.insert(
                 frontier,
                 (neighbour_element(curr_element, curr_node, neighbour), neighbour)
