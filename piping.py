@@ -1,6 +1,8 @@
 from typing import Any, Callable, overload, Final
 from functools import wraps
 
+type Function = Callable[..., Any]
+
 class Pipable[T]:
 
     '''
@@ -52,17 +54,17 @@ class Pipable[T]:
     '''
 
     VALUE = sentinel("VALUE") # using python 3.15+ built-in sentinel
-    BUILT_IN_CALLABLES: Final[dict[str, Callable]] = {
+    BUILT_IN_CALLABLES: Final[dict[str, Function]] = {
         name: getattr(__import__('builtins'), name)
         for name in dir(__import__('builtins'))
         if callable(getattr(__import__('builtins'), name))
     }
-    ALL_AVAILABLE_CALLABLES: dict[str, Callable] = BUILT_IN_CALLABLES.copy()
+    ALL_AVAILABLE_CALLABLES: dict[str, Function] = BUILT_IN_CALLABLES.copy()
     GET_AVAILABLE_CALLABLES: Final[str] = \
         "{key: value for key, value in (globals() | locals()).items() if callable(value)}"
 
     @classmethod
-    def set_available_callables(cls, available_callables: dict[str, Callable]) -> None:
+    def set_available_callables(cls, available_callables: dict[str, Function]) -> None:
         cls.ALL_AVAILABLE_CALLABLES = cls.BUILT_IN_CALLABLES | available_callables
 
     def __init__(self, value: T, lookup_free_before_attr: bool = False) -> None:
@@ -114,7 +116,7 @@ class Pipable[T]:
             return Pipable(getattr(self.value, attr), self.lookup_free_before_attr)
         
         if attr in Pipable.ALL_AVAILABLE_CALLABLES:
-            func: Callable[..., Any] = Pipable.ALL_AVAILABLE_CALLABLES[attr]
+            func: Function = Pipable.ALL_AVAILABLE_CALLABLES[attr]
             @wraps(func)
             def fake_method(*args: Any, **kwargs: Any) -> Any:
                 new_args, new_kwargs, is_replaced = self.replace_tuple_dict(args, kwargs)
@@ -166,12 +168,12 @@ class Pipable[T]:
     def __rshift__(
         self,
         func_and_args: (
-            tuple[Callable, tuple[Any, ...], dict[str, Any]] |
-            tuple[Callable, Any, dict[str, Any]] |
-            tuple[Callable, dict[str, Any]] |
-            tuple[Callable, tuple[Any, ...]] |
-            tuple[Callable, Any] |
-            Callable |
+            tuple[Function, tuple[Any, ...], dict[str, Any]] |
+            tuple[Function, Any, dict[str, Any]] |
+            tuple[Function, dict[str, Any]] |
+            tuple[Function, tuple[Any, ...]] |
+            tuple[Function, Any] |
+            Function |
             VALUE
         )
     ) -> Pipable[Any] | T:
