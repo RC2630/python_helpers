@@ -1,5 +1,5 @@
 from helpers.graph_util.graph import *
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Hashable
 from collections import deque
 from collections.abc import Iterator
 from helpers.random_util import random_element
@@ -104,7 +104,7 @@ RANDOM_FRONTIER = FrontierSpec[Any, list[Any]](
 
 NO_VISITED_SET = sentinel("NO_VISITED_SET") # using python 3.15+ built-in sentinel
 
-def generalized_traversal_iterator[T, V, E, DS, I, K](
+def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
     start_node: Node[V, E],
     start_node_element: T = None,
     node_yield_func: Callable[[T, Node[V, E]], I] = lambda element, node: (node, element),
