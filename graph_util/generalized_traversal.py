@@ -39,7 +39,7 @@ def generalized_dfs_with_path[V, E](
 
 def generalized_dfs_with_custom_element[T, V, E](
     start_node: Node[V, E],
-    start_node_element: T = NONE,
+    start_node_element: T = None,
     on_visit_func: Callable[[T, Node[V, E]], Any] = lambda element, node: None,
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
         lambda element, curr, neighbour: element
@@ -90,7 +90,7 @@ MIN_HEAP_FRONTIER: FrontierSpecType[Any] = FrontierSpec(
 
 def generalized_traversal[T, V, E](
     start_node: Node[V, E],
-    start_node_element: T = NONE,
+    start_node_element: T = None,
     on_visit_func: Callable[[T, Node[V, E]], Any] = lambda element, node: None,
     neighbour_element: Callable[[T, Node[V, E], Node[V, E]], T] = (
         lambda element, curr, neighbour: element

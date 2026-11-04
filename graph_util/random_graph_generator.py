@@ -65,7 +65,7 @@ def generate_graph(
     cost_distribution: Callable[[], float] = lambda: 1,
     ensure_connected: bool = True,
     undirected: bool = True,
-    require_strong: bool = False,
+    require_strong: bool = True,
     max_attempts: int = 1000
 ) -> Graph[None, None]:
     attempts: int = 0

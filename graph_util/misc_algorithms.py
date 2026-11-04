@@ -1,7 +1,7 @@
 from helpers.graph_util.graph import *
 from helpers.misc_util import mark_requirements
 from heapq import *
-from typing import NamedTuple, Literal
+from typing import NamedTuple, Literal, Any
 import itertools as it
 
 # ------------------------------------------------------------------
