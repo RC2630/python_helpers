@@ -51,10 +51,7 @@ class Pipable[T]:
         = func(2, 1, 3, a = 1, b = 6)
     '''
 
-    class ValueGetter:
-        pass
-
-    VALUE: Final[ValueGetter] = ValueGetter()
+    VALUE = sentinel("VALUE") # using python 3.15+ built-in sentinel
     BUILT_IN_CALLABLES: Final[dict[str, Callable]] = {
         name: getattr(__import__('builtins'), name)
         for name in dir(__import__('builtins'))
@@ -164,17 +161,19 @@ class Pipable[T]:
 
     # piping just to get the final value
     @overload
-    def __rshift__(self, func_and_args: Pipable.ValueGetter) -> T: ...
+    def __rshift__(self, func_and_args: VALUE) -> T: ...
 
     def __rshift__(
-        self, func_and_args:
+        self,
+        func_and_args: (
             tuple[Callable, tuple[Any, ...], dict[str, Any]] |
             tuple[Callable, Any, dict[str, Any]] |
             tuple[Callable, dict[str, Any]] |
             tuple[Callable, tuple[Any, ...]] |
             tuple[Callable, Any] |
             Callable |
-            Pipable.ValueGetter
+            VALUE
+        )
     ) -> Pipable[Any] | T:
 
         f: Any = func_and_args
