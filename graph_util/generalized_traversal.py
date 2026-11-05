@@ -104,7 +104,7 @@ RANDOM_FRONTIER = FrontierSpec[Any, list[Any]](
 
 NO_VISITED_SET = sentinel("NO_VISITED_SET") # using python 3.15+ built-in sentinel
 
-def generalized_traversal_multiple_successors[T, V, E, DS, I, K: Hashable](
+def generalized_traversal_any_num_successors[T, V, E, DS, I, K: Hashable](
     start_node: Node[V, E],
     start_node_element: T = None,
     node_yield_func: Callable[[T, Node[V, E]], I] = lambda element, node: (node, element),
@@ -145,7 +145,7 @@ def generalized_traversal_iterator[T, V, E, DS, I, K: Hashable](
     ),
     frontier_spec: FrontierSpec[T, DS] = STACK_FRONTIER
 ) -> Iterator[I]:
-    yield from generalized_traversal_multiple_successors(
+    yield from generalized_traversal_any_num_successors(
         start_node, start_node_element, node_yield_func,
         lambda element, curr, neighbour: [neighbour_element(element, curr, neighbour)],
         visited_key, neighbours_func, frontier_spec
