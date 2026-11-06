@@ -39,7 +39,7 @@ def should_include_file(
     if any(file.name.endswith(extension) for extension in excluded_extensions):
         return False
     if only_modified_after_timestamp is not None:
-        return file.stat().st_mtime > only_modified_after_timestamp.timestamp()
+        return file.stat().st_mtime >= only_modified_after_timestamp.timestamp()
     return True
 
 def get_all_files_with_relative(
