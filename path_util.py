@@ -3,7 +3,7 @@ from collections.abc import Collection, Iterable
 from datetime import datetime
 import re
 
-def validate(
+def validate_for_strict_mode(
     included_extensions: Collection[str] | None,
     excluded_extensions: Collection[str]
 ) -> None:
@@ -35,9 +35,11 @@ def get_all_files_with_relative(
     included_extensions: Collection[str] | None = None,
     excluded_extensions: Collection[str] = (),
     recurse_into_subfolders: bool = True,
-    only_modified_after_timestamp: datetime | None = None
+    only_modified_after_timestamp: datetime | None = None,
+    strict: bool = False
 ) -> dict[str, str]:
-    validate(included_extensions, excluded_extensions)
+    if strict:
+        validate_for_strict_mode(included_extensions, excluded_extensions)
     if (m := re.match(r"/([a-z])/.*", path.lower())) is not None:
         path = f"{m.group(1).upper()}:/" + path[3:]
     root = Path(path)
@@ -62,9 +64,10 @@ def get_all_files(
     included_extensions: Collection[str] | None = None,
     excluded_extensions: Collection[str] = (),
     recurse_into_subfolders: bool = True,
-    only_modified_after_timestamp: datetime | None = None
+    only_modified_after_timestamp: datetime | None = None,
+    strict: bool = False
 ) -> list[str]:
     return list(get_all_files_with_relative(
         path, included_extensions, excluded_extensions,
-        recurse_into_subfolders, only_modified_after_timestamp
+        recurse_into_subfolders, only_modified_after_timestamp, strict
     ).values())
