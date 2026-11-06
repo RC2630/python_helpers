@@ -3,18 +3,6 @@ from collections.abc import Collection, Iterable
 from datetime import datetime
 import re
 
-def get_all_files(
-    path: str,
-    included_extensions: Collection[str] | None = None,
-    excluded_extensions: Collection[str] = (),
-    recurse_into_subfolders: bool = True,
-    only_modified_after_timestamp: datetime | None = None
-) -> list[str]:
-    return list(get_all_files_with_relative(
-        path, included_extensions, excluded_extensions,
-        recurse_into_subfolders, only_modified_after_timestamp
-    ).values())
-
 def validate(
     included_extensions: Collection[str] | None,
     excluded_extensions: Collection[str]
@@ -68,3 +56,15 @@ def get_all_files_with_relative(
             file, included_extensions, excluded_extensions, only_modified_after_timestamp
         )
     }
+
+def get_all_files(
+    path: str,
+    included_extensions: Collection[str] | None = None,
+    excluded_extensions: Collection[str] = (),
+    recurse_into_subfolders: bool = True,
+    only_modified_after_timestamp: datetime | None = None
+) -> list[str]:
+    return list(get_all_files_with_relative(
+        path, included_extensions, excluded_extensions,
+        recurse_into_subfolders, only_modified_after_timestamp
+    ).values())
