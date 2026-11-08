@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Concatenate, Any, NamedTuple, cast
+from typing import Callable, Concatenate, Any, NamedTuple, TypeForm
 from helpers.reference import Reference
 
 type ResultRef[R] = Reference[FunctionCallRecord[R]]
@@ -9,7 +9,7 @@ class FunctionCallRecord[R](NamedTuple):
     kwargs: dict[str, Any]
     result: R
 
-def init_ref[T](result_type: type[T] = cast(type[Any], Any)) -> ResultRef[T]:
+def init_ref[T](result_type: TypeForm[T] = Any) -> ResultRef[T]:
     return Reference()
 
 def change_to_output_param[**P, R](

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Never, cast
+from typing import Any, Callable, Never, TypeForm
 from collections.abc import Sequence, Iterable
 from itertools import groupby
 from collections import defaultdict
@@ -73,7 +73,7 @@ type StrictNestedDict[K] = NestedDict[K, Never]
 type AnyNestedDict[K] = NestedDict[K, Any]
 
 def make_nested_defaultdict[K, L](
-    key_type: type[K] = cast(type[Any], Any),
-    leaf_type: type[L] = cast(type[Any], Any)
+    key_type: TypeForm[K] = Any,
+    leaf_type: TypeForm[L] = Any
 ) -> NestedDict[K, L]:
     return defaultdict(make_nested_defaultdict)
