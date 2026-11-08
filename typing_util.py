@@ -24,6 +24,7 @@ def get_real_type[T](typeform: TypeForm[T]) -> type[T]:
         if not value_changed and not origin_changed:
             return typ
 
-def get_type_name(typeform: TypeForm[Any]) -> str:
+def get_type_name(typeform: TypeForm[Any], final_component_only: bool = True) -> str:
     s: str = str(typeform)
-    return getattr(typeform, "__name__", s) if s.startswith("<class '") else s
+    name: str = getattr(typeform, "__name__", s) if s.startswith("<class '") else s
+    return name.split(".")[-1] if final_component_only else name
