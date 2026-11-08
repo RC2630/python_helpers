@@ -1,6 +1,7 @@
-from typing import Any, Callable
+from typing import Any, Callable, Never
 from collections.abc import Sequence, Iterable
 from itertools import groupby
+from collections import defaultdict
 
 def is_hashable(obj: Any) -> bool:
     try:
@@ -66,3 +67,10 @@ def find_witness_if_any[T, W, S](
         return w
     else:
         return sentinel
+
+type NestedDict[K, V] = dict[K, V | NestedDict[K, V]]
+type StrictNestedDict[K] = NestedDict[K, Never]
+type AnyNestedDict[K] = NestedDict[K, Any]
+
+def make_nested_defaultdict() -> NestedDict[Any, Any]:
+    return defaultdict(make_nested_defaultdict)
