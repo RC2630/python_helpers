@@ -1,6 +1,6 @@
 from typing import Callable, NamedTuple
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Container
 import helpers.random_util as ru
 
 # -------------------------------------------
@@ -60,25 +60,30 @@ class Node[V, E]:
                 for dest, edge in self.edges.items()
             )
 
-    def all_reachable_nodes(self) -> set[Node[V, E]]:
+    def all_reachable_nodes(self, ignore: Container[Node[V, E]] = ()) -> set[Node[V, E]]:
+        if self in ignore:
+            return set()
         result: set[Node[V, E]] = {self}
         frontier: list[Node[V, E]] = [self]
         while len(frontier) > 0:
             curr: Node[V, E] = frontier.pop()
             for neighbour in curr.edges:
-                if neighbour not in result:
+                if neighbour not in result and neighbour not in ignore:
                     result.add(neighbour)
                     frontier.append(neighbour)
         return result
 
-    def strongly_connected_component(self) -> set[Node[V, E]]:
-        outgoing_component: set[Node[V, E]] = self.all_reachable_nodes()
+    def strongly_connected_component(self, ignore: Container[Node[V, E]] = ()) -> set[Node[V, E]]:
+        if self in ignore:
+            return set()
+        outgoing_component: set[Node[V, E]] = self.all_reachable_nodes(ignore)
         incoming_neighbours: dict[Node[V, E], list[Node[V, E]]] = defaultdict(list)
         for node in outgoing_component:
             for dest in node.edges:
-                incoming_neighbours[dest].append(node)
-        incoming_component: set[Node[V, E]] = {self}.union(incoming_neighbours[self])
-        to_iterate_over: list[Node[V, E]] = incoming_neighbours[self]
+                if dest not in ignore:
+                    incoming_neighbours[dest].append(node)
+        incoming_component: set[Node[V, E]] = {self}
+        to_iterate_over: list[Node[V, E]] = [self]
         while True:
             next_to_iterate_over: list[Node[V, E]] = []
             for node in to_iterate_over:
@@ -110,15 +115,18 @@ class Graph[V, E]:
 
     def find_connected_components(self, undirected: bool = True) -> list[list[Node[V, E]]]:
         remaining_nodes: set[Node[V, E]] = set(self.nodes)
+        collected_nodes: set[Node[V, E]] = set()
         connected_components: list[set[Node[V, E]]] = []
         while len(remaining_nodes) > 0:
             arbitrary_node: Node[V, E] = remaining_nodes.pop()
             connected_component: set[Node[V, E]] = (
                 arbitrary_node.all_reachable_nodes()
                 if undirected
-                else arbitrary_node.strongly_connected_component()
+                else arbitrary_node.strongly_connected_component(collected_nodes)
             )
             connected_components.append(connected_component)
+            if not undirected:
+                collected_nodes.update(connected_component)
             remaining_nodes.difference_update(connected_component)
         return [list(component) for component in connected_components]
 
