@@ -238,7 +238,7 @@ def topological_sort_elements[T](
         two_before_one: bool = must_appear_before(node_2.payload, node_1.payload)
         if one_before_two and two_before_one:
             raise ValueError(
-                f"invalid strict partial order: must_appear_before returned True "
+                f"invalid precedence relation: must_appear_before returned True "
                 f"for {node_1.payload} and {node_2.payload} in both directions"
             )
         elif one_before_two:
