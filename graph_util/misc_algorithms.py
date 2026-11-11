@@ -226,7 +226,7 @@ def topologically_reorder_nodes[V, E](
 ) -> None:
     graph.nodes = topological_sort(graph, use_edge)
 
-@mark_requirements("strict partial order")
+@mark_requirements("acyclic precedence relation")
 def topological_sort_elements[T](
     elements: Iterable[T], must_appear_before: Callable[[T, T], bool] = lt
 ) -> list[T]:
