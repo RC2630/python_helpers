@@ -1,5 +1,5 @@
 from helpers.graph_util.graph import Graph, Node
-from helpers.graph_util.misc_algorithms import make_connected_directed, make_connected_undirected
+import helpers.graph_util.connected_components as cc
 import helpers.random_util as ru
 from typing import Callable
 
@@ -54,9 +54,9 @@ def generate_graph_attempt(
     graph: Graph[None, None] = Graph(nodes)
     if ensure_connected:
         if undirected:
-            make_connected_undirected(graph, cost_distribution)
+            cc.make_connected_undirected(graph, cost_distribution)
         else:
-            make_connected_directed(graph, cost_distribution, require_strong = require_strong)
+            cc.make_connected_directed(graph, cost_distribution, require_strong = require_strong)
 
     return graph
 
