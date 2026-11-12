@@ -82,7 +82,25 @@ def strongly_connected_component[V, E](
 # ------------------------------------------------------------------
 
 def dfs_finishing_order[V, E](start_node: Node[V, E]) -> list[Node[V, E]]:
-    ...
+    call_stack: list[Node[V, E]] = [start_node]
+    visited: set[Node[V, E]] = set()
+    finishing_order: list[Node[V, E]] = []
+    node_to_unprocessed_neighbours: dict[Node[V, E], list[Node[V, E]]] = {}
+    while len(call_stack) > 0:
+        curr: Node[V, E] = call_stack[-1]
+        if curr not in visited:
+            visited.add(curr)
+            node_to_unprocessed_neighbours[curr] = list(curr.edges)
+        if len(node_to_unprocessed_neighbours[curr]) == 0:
+            finishing_order.append(curr)
+            call_stack.pop()
+        else:
+            neighbour: Node[V, E] = node_to_unprocessed_neighbours[curr].pop()
+            if neighbour not in visited:
+                call_stack.append(neighbour)
+    return finishing_order
+
+# ------------------------------------------------------------------
 
 @mark_requirements("directed")
 def find_strongly_connected_components[V, E](graph: Graph[V, E]) -> list[list[Node[V, E]]]:
