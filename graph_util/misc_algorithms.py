@@ -48,24 +48,31 @@ def make_connected_undirected[V, E](
 # ------------------------------------------------------------------
 
 @mark_requirements("directed")
+def get_incoming_neighbours[V, E](
+    node: Node[V, E], ignore: Container[Node[V, E]] = ()
+) -> dict[Node[V, E], list[Node[V, E]]]:
+    outgoing_component: set[Node[V, E]] = node.all_reachable_nodes(ignore)
+    incoming_neighbours: dict[Node[V, E], list[Node[V, E]]] = defaultdict(list)
+    for curr in outgoing_component:
+        for dest in curr.edges:
+            if dest not in ignore:
+                incoming_neighbours[dest].append(curr)
+    return incoming_neighbours
+
+@mark_requirements("directed")
 def strongly_connected_component[V, E](
     node: Node[V, E], ignore: Container[Node[V, E]] = ()
 ) -> set[Node[V, E]]:
     if node in ignore:
         return set()
-    outgoing_component: set[Node[V, E]] = node.all_reachable_nodes(ignore)
-    incoming_neighbours: dict[Node[V, E], list[Node[V, E]]] = defaultdict(list)
-    for node in outgoing_component:
-        for dest in node.edges:
-            if dest not in ignore:
-                incoming_neighbours[dest].append(node)
+    incoming_neighbours: dict[Node[V, E], list[Node[V, E]]] = get_incoming_neighbours(node, ignore)
     incoming_component: set[Node[V, E]] = {node}
     to_iterate_over: list[Node[V, E]] = [node]
     while True:
         next_to_iterate_over: list[Node[V, E]] = []
-        for node in to_iterate_over:
+        for curr in to_iterate_over:
             to_add: list[Node[V, E]] = [
-                neighbour for neighbour in incoming_neighbours[node]
+                neighbour for neighbour in incoming_neighbours[curr]
                 if neighbour not in incoming_component
             ]
             next_to_iterate_over.extend(to_add)
@@ -74,6 +81,11 @@ def strongly_connected_component[V, E](
             break
         to_iterate_over = next_to_iterate_over
     return incoming_component
+
+# ------------------------------------------------------------------
+
+def dfs_finishing_order[V, E](start_node: Node[V, E]) -> list[Node[V, E]]:
+    ...
 
 @mark_requirements("directed")
 def find_strongly_connected_components[V, E](graph: Graph[V, E]) -> list[list[Node[V, E]]]:
