@@ -1,5 +1,6 @@
 from typing import Any, Callable, overload, Final
 from functools import wraps
+import builtins
 
 type Function = Callable[..., Any]
 
@@ -55,9 +56,9 @@ class Pipable[T]:
 
     VALUE = sentinel("VALUE") # using python 3.15+ built-in sentinel
     BUILT_IN_CALLABLES: Final[dict[str, Function]] = {
-        name: getattr(__import__('builtins'), name)
-        for name in dir(__import__('builtins'))
-        if callable(getattr(__import__('builtins'), name))
+        name: getattr(builtins, name)
+        for name in dir(builtins)
+        if callable(getattr(builtins, name))
     }
     ALL_AVAILABLE_CALLABLES: dict[str, Function] = BUILT_IN_CALLABLES.copy()
     GET_AVAILABLE_CALLABLES: Final[str] = \
