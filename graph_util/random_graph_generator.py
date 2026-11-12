@@ -1,4 +1,7 @@
-from helpers.graph_util.graph import *
+from helpers.graph_util.graph import Graph, Node
+from helpers.graph_util.misc_algorithms import make_connected_directed, make_connected_undirected
+import helpers.random_util as ru
+from typing import Callable
 
 class CannotGenerateGraphError(Exception): pass
 
@@ -48,14 +51,14 @@ def generate_graph_attempt(
             cost: float = cost_distribution()
             node.create_edge(dest, cost, undirected)
 
-    g: Graph[None, None] = Graph(nodes)
+    graph: Graph[None, None] = Graph(nodes)
     if ensure_connected:
         if undirected:
-            g.make_connected_undirected(cost_distribution)
+            make_connected_undirected(graph, cost_distribution)
         else:
-            g.make_connected_directed(cost_distribution, require_strong = require_strong)
+            make_connected_directed(graph, cost_distribution, require_strong = require_strong)
 
-    return g
+    return graph
 
 # -------------------------------------------
 

@@ -1,7 +1,5 @@
-from typing import Callable, NamedTuple
-from collections import defaultdict
+from typing import NamedTuple
 from collections.abc import Iterable, Container
-import helpers.random_util as ru
 
 # -------------------------------------------
 
@@ -73,31 +71,6 @@ class Node[V, E]:
                     frontier.append(neighbour)
         return result
 
-    def strongly_connected_component(self, ignore: Container[Node[V, E]] = ()) -> set[Node[V, E]]:
-        if self in ignore:
-            return set()
-        outgoing_component: set[Node[V, E]] = self.all_reachable_nodes(ignore)
-        incoming_neighbours: dict[Node[V, E], list[Node[V, E]]] = defaultdict(list)
-        for node in outgoing_component:
-            for dest in node.edges:
-                if dest not in ignore:
-                    incoming_neighbours[dest].append(node)
-        incoming_component: set[Node[V, E]] = {self}
-        to_iterate_over: list[Node[V, E]] = [self]
-        while True:
-            next_to_iterate_over: list[Node[V, E]] = []
-            for node in to_iterate_over:
-                to_add: list[Node[V, E]] = [
-                    neighbour for neighbour in incoming_neighbours[node]
-                    if neighbour not in incoming_component
-                ]
-                next_to_iterate_over.extend(to_add)
-                incoming_component.update(to_add)
-            if len(next_to_iterate_over) == 0:
-                break
-            to_iterate_over = next_to_iterate_over
-        return incoming_component
-
 # -------------------------------------------
 
 class Graph[V, E]:
@@ -112,80 +85,3 @@ class Graph[V, E]:
         if len(self.nodes) == 0:
             return "(empty graph)"
         return "\n".join(str(node) for node in self.nodes)
-
-    def find_connected_components(self, undirected: bool = True) -> list[list[Node[V, E]]]:
-        remaining_nodes: set[Node[V, E]] = set(self.nodes)
-        collected_nodes: set[Node[V, E]] = set()
-        connected_components: list[set[Node[V, E]]] = []
-        while len(remaining_nodes) > 0:
-            arbitrary_node: Node[V, E] = remaining_nodes.pop()
-            connected_component: set[Node[V, E]] = (
-                arbitrary_node.all_reachable_nodes()
-                if undirected
-                else arbitrary_node.strongly_connected_component(collected_nodes)
-            )
-            connected_components.append(connected_component)
-            if not undirected:
-                collected_nodes.update(connected_component)
-            remaining_nodes.difference_update(connected_component)
-        return [list(component) for component in connected_components]
-
-    def make_connected_undirected(
-        self, cost_distribution: Callable[[], float] = lambda: 1,
-        default_payload: E = None
-    ) -> None:
-        connected_components: list[list[Node[V, E]]] = \
-            self.find_connected_components(undirected = True)
-        while len(connected_components) > 1:
-            cc1, cc2 = ru.fast_rejection_sample(
-                connected_components,
-                count = 2,
-                remove = True,
-                mode = "distinct_indices"
-            )
-            random_node_1: Node[V, E] = ru.random_element(cc1)
-            random_node_2: Node[V, E] = ru.random_element(cc2)
-            random_node_1.create_edge(
-                random_node_2, cost_distribution(),
-                undirected = True, payload = default_payload
-            )
-            if len(cc1) < len(cc2):
-                cc1, cc2 = cc2, cc1
-            cc1.extend(cc2)
-            connected_components.append(cc1)
-
-    def make_connected_directed(
-        self, cost_distribution: Callable[[], float] = lambda: 1,
-        default_payload: E = None, require_strong: bool = True
-    ) -> None:
-        
-        if len(self.nodes) == 0:
-            return
-        still_unconnected: list[list[Node[V, E]]] = \
-            self.find_connected_components(undirected = False)
-        connected_so_far: list[list[Node[V, E]]] = [
-            ru.random_element(still_unconnected, remove = True)
-        ]
-
-        def make_directed_edge_if_not_present(node_1: Node[V, E], node_2: Node[V, E]) -> None:
-            if node_2 not in node_1.edges:
-                node_1.create_edge(
-                    node_2, cost_distribution(),
-                    undirected = False, payload = default_payload
-                )
-
-        while len(still_unconnected) > 0:
-            unconnected_component: list[Node[V, E]] = (
-                ru.random_element(still_unconnected, remove = True)
-            )
-            connected_component: list[Node[V, E]] = ru.random_element(connected_so_far)
-            make_directed_edge_if_not_present(
-                ru.random_element(connected_component),
-                ru.random_element(unconnected_component)
-            )
-            if require_strong:
-                make_directed_edge_if_not_present(
-                    ru.random_element(unconnected_component),
-                    ru.random_element(connected_component)
-                )
-            connected_so_far.append(unconnected_component)
