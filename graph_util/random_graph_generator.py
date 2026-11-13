@@ -7,16 +7,18 @@ class CannotGenerateGraphError(Exception): pass
 
 # -------------------------------------------
 
-def generate_graph_attempt(
+def generate_graph_attempt[V, E](
     num_nodes: int,
     num_edges_distribution: Callable[[], int],
     cost_distribution: Callable[[], float],
     ensure_connected: bool,
     undirected: bool,
-    require_strong: bool
-) -> Graph[None, None]:
+    require_strong: bool,
+    default_node_payload: V,
+    default_edge_payload: E
+) -> Graph[V, E]:
     
-    nodes: list[Node[None, None]] = [Node(f"n{i}") for i in range(num_nodes)]
+    nodes: list[Node[V, E]] = [Node(f"n{i}", default_node_payload) for i in range(num_nodes)]
     for node in nodes:
 
         num_edges: int = num_edges_distribution()
@@ -29,7 +31,7 @@ def generate_graph_attempt(
         if num_edges == 0:
             continue
 
-        dests: list[Node[None, None]] = (
+        dests: list[Node[V, E]] = (
             ru.fast_rejection_sample(
                 nodes,
                 count = num_edges,
@@ -49,34 +51,39 @@ def generate_graph_attempt(
 
         for dest in dests:
             cost: float = cost_distribution()
-            node.create_edge(dest, cost, undirected)
+            node.create_edge(dest, cost, undirected, default_edge_payload)
 
-    graph: Graph[None, None] = Graph(nodes)
+    graph: Graph[V, E] = Graph(nodes)
     if ensure_connected:
         if undirected:
-            cc.make_connected_undirected(graph, cost_distribution)
+            cc.make_connected_undirected(graph, cost_distribution, default_edge_payload)
         else:
-            cc.make_connected_directed(graph, cost_distribution, require_strong = require_strong)
+            cc.make_connected_directed(
+                graph, cost_distribution, default_edge_payload, require_strong
+            )
 
     return graph
 
 # -------------------------------------------
 
-def generate_graph(
+def generate_graph[V, E](
     num_nodes: int,
     num_edges_distribution: Callable[[], int],
     cost_distribution: Callable[[], float] = lambda: 1,
     ensure_connected: bool = True,
     undirected: bool = True,
     require_strong: bool = True,
+    default_node_payload: V = None,
+    default_edge_payload: E = None,
     max_attempts: int = 1000
-) -> Graph[None, None]:
+) -> Graph[V, E]:
     attempts: int = 0
     while attempts < max_attempts:
         try:
             return generate_graph_attempt(
                 num_nodes, num_edges_distribution, cost_distribution,
-                ensure_connected, undirected, require_strong
+                ensure_connected, undirected, require_strong,
+                default_node_payload, default_edge_payload
             )
         except (ru.EmptySequenceError, ru.NotEnoughElementsError):
             attempts += 1
