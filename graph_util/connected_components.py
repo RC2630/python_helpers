@@ -3,7 +3,7 @@ from helpers.misc_util import mark_requirements
 import helpers.random_util as ru
 from typing import Callable
 from collections import defaultdict
-from collections.abc import Container
+from collections.abc import Container, Iterable
 
 # ------------------------------------------------------------------
 
@@ -81,7 +81,11 @@ def strongly_connected_component[V, E](
 
 # ------------------------------------------------------------------
 
-def dfs_finishing_order[V, E](start_node: Node[V, E]) -> list[Node[V, E]]:
+def dfs_finishing_order[V, E](
+    start_node: Node[V, E], ignore: Container[Node[V, E]] = ()
+) -> list[Node[V, E]]:
+    if start_node in ignore:
+        return []
     call_stack: list[Node[V, E]] = [start_node]
     visited: set[Node[V, E]] = set()
     finishing_order: list[Node[V, E]] = []
@@ -90,7 +94,10 @@ def dfs_finishing_order[V, E](start_node: Node[V, E]) -> list[Node[V, E]]:
         curr: Node[V, E] = call_stack[-1]
         if curr not in visited:
             visited.add(curr)
-            node_to_unprocessed_neighbours[curr] = list(curr.edges)
+            node_to_unprocessed_neighbours[curr] = [
+                neighbour for neighbour in curr.edges
+                if neighbour not in ignore
+            ]
         if len(node_to_unprocessed_neighbours[curr]) == 0:
             finishing_order.append(curr)
             call_stack.pop()
@@ -100,11 +107,51 @@ def dfs_finishing_order[V, E](start_node: Node[V, E]) -> list[Node[V, E]]:
                 call_stack.append(neighbour)
     return finishing_order
 
+def dfs_finishing_order_full_graph[V, E](graph: Graph[V, E]) -> list[Node[V, E]]:
+    unvisited_nodes: set[Node[V, E]] = set(graph.nodes)
+    finishing_order: list[Node[V, E]] = []
+    ignore: set[Node[V, E]] = set()
+    while len(unvisited_nodes) > 0:
+        arbitrary_node: Node[V, E] = unvisited_nodes.pop()
+        curr_finishing_order: list[Node[V, E]] = dfs_finishing_order(arbitrary_node, ignore)
+        finishing_order.extend(curr_finishing_order)
+        ignore.update(curr_finishing_order)
+        unvisited_nodes.difference_update(curr_finishing_order)
+    return finishing_order
+
 # ------------------------------------------------------------------
 
 @mark_requirements("directed")
 def find_strongly_connected_components[V, E](graph: Graph[V, E]) -> list[list[Node[V, E]]]:
-    raise NotImplementedError
+
+    reversed_finishing_order: Iterable[Node[V, E]] = \
+        reversed(dfs_finishing_order_full_graph(graph))
+    scc_list: list[list[Node[V, E]]] = []
+    visited: set[Node[V, E]] = set()
+
+    reversed_edges: dict[Node[V, E], list[Node[V, E]]] = defaultdict(list)
+    for node in graph.nodes:
+        for neighbour in node.edges:
+            reversed_edges[neighbour].append(node)
+
+    def dfs_on_reversed_edges(start_node: Node[V, E]) -> list[Node[V, E]]:
+        visited.add(start_node)
+        discovered: list[Node[V, E]] = [start_node]
+        frontier: list[Node[V, E]] = [start_node]
+        while len(frontier) > 0:
+            curr: Node[V, E] = frontier.pop()
+            for reversed_neighbour in reversed_edges[curr]:
+                if reversed_neighbour not in visited:
+                    visited.add(reversed_neighbour)
+                    discovered.append(reversed_neighbour)
+                    frontier.append(reversed_neighbour)
+        return discovered
+
+    for node in reversed_finishing_order:
+        if node not in visited:
+            scc_list.append(dfs_on_reversed_edges(node))
+
+    return scc_list
 
 # ------------------------------------------------------------------
 
